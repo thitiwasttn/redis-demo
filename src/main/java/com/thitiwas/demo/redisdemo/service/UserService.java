@@ -2,11 +2,13 @@ package com.thitiwas.demo.redisdemo.service;
 
 import com.thitiwas.demo.redisdemo.model.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 @Service
 @Slf4j
@@ -16,38 +18,19 @@ public class UserService {
 
     public void createUser5() {
 
-        log.info("create 5 user");
-        users.add(User.builder()
-                .createDate(Calendar.getInstance().getTime())
-                .email("email" + getNewUserId())
-                .id(getNewUserId())
-                .name("name" + getNewUserId())
-                .build());
-        users.add(User.builder()
-                .email("email" + getNewUserId())
-                .createDate(Calendar.getInstance().getTime())
-                .id(getNewUserId())
-                .name("name" + getNewUserId())
-                .build());
-        users.add(User.builder()
-                .email("email" + getNewUserId())
-                .createDate(Calendar.getInstance().getTime())
-                .id(getNewUserId())
-                .name("name" + getNewUserId())
-                .build());
-        users.add(User.builder()
-                .email("email" + getNewUserId())
-                .createDate(Calendar.getInstance().getTime())
-                .id(getNewUserId())
-                .name("name" + getNewUserId())
-                .build());
-        users.add(User.builder()
-                .email("email" + getNewUserId())
-                .createDate(Calendar.getInstance().getTime())
-                .id(getNewUserId())
-                .name("name" + getNewUserId())
-                .build());
+        int target = 5;
+        log.info("create " + target + " user");
+        IntStream.range(0, target).forEach(i -> addOneUser());
         log.info("users :{}", users);
+    }
+
+    void addOneUser() {
+        users.add(User.builder()
+                .email("email" + getNewUserId())
+                .createDate(Calendar.getInstance().getTime())
+                .id(getNewUserId())
+                .name("name" + getNewUserId())
+                .build());
     }
 
     // unless ถ้าดึงมา ไม่ null จะ cache
@@ -62,21 +45,31 @@ public class UserService {
 
     public User insertUser(User user) {
         user.setCreateDate(Calendar.getInstance().getTime());
-        user.setId((long) (this.users.size() + 1));
+        user.setId(getNewUserId());
         this.users.add(user);
         return user;
     }
 
+    // remove cache by id
+    @CacheEvict(value = "user", key = "#id")
     public void removeUser(Long id) throws IllegalAccessException {
         if (!this.users.removeIf(user -> user.getId().equals(id))) {
             throw new IllegalAccessException("can't find id: " + id);
         }
     }
 
+    // remove cache all cache
+    @CacheEvict(value = "user", allEntries = true)
+    public void removeAll(){
+        this.users = new ArrayList<>();
+    }
+
     // update cache
     @CachePut(value = "user", key = "#user.id")
     public User updateUser(User user) {
-        this.users.stream().filter(user1 -> user.getId().equals(user1.getId())).findFirst()
+        this.users.stream()
+                .filter(user1 -> user.getId().equals(user1.getId()))
+                .findFirst()
                 .ifPresent(user1 -> {
                     user1.setName(user.getName());
                     user1.setEmail(user.getEmail());
