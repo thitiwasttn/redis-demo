@@ -29,6 +29,6 @@ public class RedisConfig {
             e.printStackTrace();
             log.error("clear all cache error ", e);
         }
-        log.info("clear all cache");
+        log.info("cleared all cache");
     }
 }
