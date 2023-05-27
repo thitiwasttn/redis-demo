@@ -17,5 +17,6 @@ public class User implements Serializable {
     private String name;
     private String email;
     private Date createDate;
+    private Date updateDate;
 
 }

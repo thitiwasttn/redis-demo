@@ -26,12 +26,14 @@ public class UserService {
     }
 
     private void addOneUser() {
+        Date date = Calendar.getInstance().getTime();
         Long newUserId = getNewUserId();
         users.add(User.builder()
                 .email("email" + newUserId)
-                .createDate(Calendar.getInstance().getTime())
+                .createDate(date)
                 .id(newUserId)
                 .name("name" + newUserId)
+                .updateDate(date)
                 .build());
     }
 
@@ -48,6 +50,7 @@ public class UserService {
     public User insertUser(User user) {
         user.setCreateDate(Calendar.getInstance().getTime());
         user.setId(getNewUserId());
+        user.setUpdateDate(Calendar.getInstance().getTime());
         this.users.add(user);
         return user;
     }
@@ -62,7 +65,7 @@ public class UserService {
 
     // remove cache all cache
     @CacheEvict(value = "user", allEntries = true)
-    public void removeAll(){
+    public void removeAll() {
         this.users = new ArrayList<>();
     }
 
@@ -75,6 +78,7 @@ public class UserService {
                 .ifPresent(user1 -> {
                     user1.setName(user.getName());
                     user1.setEmail(user.getEmail());
+                    user1.setUpdateDate(Calendar.getInstance().getTime());
                 });
         return findById(user.getId()).orElseThrow(() -> new RuntimeException("user not found"));
     }

@@ -1,17 +1,16 @@
 package com.thitiwas.demo.redisdemo.config;
 
 import com.thitiwas.demo.redisdemo.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class UserConfig {
-
-    private final UserService userService;
 
     @Autowired
     public UserConfig(UserService userService) {
-        this.userService = userService;
-        this.userService.createUserForLoop(5);
+        userService.createUserForLoop(5);
     }
 }
