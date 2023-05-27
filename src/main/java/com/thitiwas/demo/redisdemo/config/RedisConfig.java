@@ -21,8 +21,8 @@ public class RedisConfig {
     private void clearAllCache() {
         log.info("redisHost :{}", redisProperties.getHost());
         log.info("redisPort :{}", redisProperties.getPort());
-        JedisPool pool = new JedisPool(redisProperties.getHost(), redisProperties.getPort());
-        try {
+
+        try (JedisPool pool = new JedisPool(redisProperties.getHost(), redisProperties.getPort())) {
             Jedis resource = pool.getResource();
             resource.flushAll();
         } catch (Exception e) {
