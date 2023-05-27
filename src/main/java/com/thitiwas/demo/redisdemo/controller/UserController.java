@@ -33,4 +33,15 @@ public class UserController {
     public ResponseEntity<User> updateUser(@RequestBody User user){
         return ResponseEntity.ok(userService.updateUser(user));
     }
+
+    @PostMapping("/remove-all")
+    public ResponseEntity<String> removeAll(){
+        userService.removeAll();
+        return ResponseEntity.ok("ok");
+    }
+
+    @PostMapping("/insert")
+    public ResponseEntity<User> insert(@RequestBody User user){
+        return ResponseEntity.ok(userService.insertUser(user));
+    }
 }

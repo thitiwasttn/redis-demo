@@ -1,6 +1,7 @@
 package com.thitiwas.demo.redisdemo.service;
 
 import com.thitiwas.demo.redisdemo.model.User;
+import com.thitiwas.demo.redisdemo.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -15,20 +16,24 @@ import java.util.stream.IntStream;
 @Slf4j
 public class UserService {
 
-    List<User> users = new ArrayList<>();
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     public void createUserForLoop(int target) {
 
         // int target = 5;
         log.info("create " + target + " user");
         IntStream.range(0, target).forEach(i -> addOneUser());
-        log.info("users id list :{}", users.stream().map(User::getId).collect(Collectors.toList()));
+        log.info("users id list :{}", userRepository.getUsers().stream().map(User::getId).collect(Collectors.toList()));
     }
 
     private void addOneUser() {
         Date date = Calendar.getInstance().getTime();
         Long newUserId = getNewUserId();
-        users.add(User.builder()
+        userRepository.addUser(User.builder()
                 .email("email" + newUserId)
                 .createDate(date)
                 .id(newUserId)
@@ -40,25 +45,25 @@ public class UserService {
     // unless ถ้าดึงมา ไม่ null จะ cache
     @Cacheable(value = "user", key = "#id", unless = "#result == null")
     public Optional<User> findById(Long id) {
-        return this.users.stream().filter(user -> user.getId().equals(id)).findFirst();
+        return userRepository.findById(id);
     }
 
     public List<User> findAll() {
-        return this.users;
+        return userRepository.getUsers();
     }
 
     public User insertUser(User user) {
         user.setCreateDate(Calendar.getInstance().getTime());
         user.setId(getNewUserId());
         user.setUpdateDate(Calendar.getInstance().getTime());
-        this.users.add(user);
+        userRepository.addUser(user);
         return user;
     }
 
     // remove cache by id
     @CacheEvict(value = "user", key = "#id")
     public void removeUser(Long id) throws IllegalAccessException {
-        if (!this.users.removeIf(user -> user.getId().equals(id))) {
+        if (!userRepository.removeById(id)) {
             throw new IllegalAccessException("can't find id: " + id);
         }
     }
@@ -66,24 +71,17 @@ public class UserService {
     // remove cache all cache
     @CacheEvict(value = "user", allEntries = true)
     public void removeAll() {
-        this.users = new ArrayList<>();
+        userRepository.removeAll();
     }
 
     // update cache
     @CachePut(value = "user", key = "#user.id")
     public User updateUser(User user) {
-        this.users.stream()
-                .filter(user1 -> user.getId().equals(user1.getId()))
-                .findFirst()
-                .ifPresent(user1 -> {
-                    user1.setName(user.getName());
-                    user1.setEmail(user.getEmail());
-                    user1.setUpdateDate(Calendar.getInstance().getTime());
-                });
+        userRepository.updateUser(user);
         return findById(user.getId()).orElseThrow(() -> new RuntimeException("user not found"));
     }
 
     public Long getNewUserId() {
-        return (long) (this.users.size() + 1);
+        return userRepository.getNewUserId();
     }
 }
