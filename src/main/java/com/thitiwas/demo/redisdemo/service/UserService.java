@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
@@ -16,15 +17,15 @@ public class UserService {
 
     List<User> users = new ArrayList<>();
 
-    public void createUser5() {
+    public void createUserForLoop(int target) {
 
-        int target = 5;
+        // int target = 5;
         log.info("create " + target + " user");
         IntStream.range(0, target).forEach(i -> addOneUser());
-        log.info("users :{}", users);
+        log.info("users id list :{}", users.stream().map(User::getId).collect(Collectors.toList()));
     }
 
-    void addOneUser() {
+    private void addOneUser() {
         users.add(User.builder()
                 .email("email" + getNewUserId())
                 .createDate(Calendar.getInstance().getTime())

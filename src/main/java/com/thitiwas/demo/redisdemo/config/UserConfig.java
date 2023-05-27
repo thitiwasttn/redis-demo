@@ -12,6 +12,6 @@ public class UserConfig {
     @Autowired
     public UserConfig(UserService userService) {
         this.userService = userService;
-        this.userService.createUser5();
+        this.userService.createUserForLoop(5);
     }
 }
