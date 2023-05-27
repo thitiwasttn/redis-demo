@@ -26,11 +26,12 @@ public class UserService {
     }
 
     private void addOneUser() {
+        Long newUserId = getNewUserId();
         users.add(User.builder()
-                .email("email" + getNewUserId())
+                .email("email" + newUserId)
                 .createDate(Calendar.getInstance().getTime())
-                .id(getNewUserId())
-                .name("name" + getNewUserId())
+                .id(newUserId)
+                .name("name" + newUserId)
                 .build());
     }
 
